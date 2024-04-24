@@ -8,10 +8,9 @@ canvas {
 }
 #container {
     position: relative;
-    width: 800px; /* コンテナの幅を設定 */
-    height: 400px; /* コンテナの高さを設定 */
-    /* overflow: hidden; はみ出た部分は非表示に */
-    margin: 40px auto; /* 画面中央に配置 */
+    width: 800px;
+    height: 400px;
+    margin: 40px auto;
 }
 
 /* .button-45 {
@@ -95,8 +94,6 @@ canvas {
     font-size: 1em;
 }
 
-
-
 .eraserMode {
-    background-color: rgb(215, 146, 146); /* 消しゴムモードがONの時、ボタンの背景色を赤にする */
+    background-color: rgb(215, 146, 146);
   }

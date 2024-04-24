@@ -2,8 +2,9 @@ const canvas = document.getElementById("musicCanvas");
 const ctx = canvas.getContext("2d");
 const pointRadius = 10;
 const toggleButton = document.getElementById('toggleOrientation');
-
+const eraserButton = document.getElementById('toggleEraserMode');
 let isHorizontal = true;
+let isEraserMode = false;
 
 let state = {
   points: [],
@@ -12,18 +13,34 @@ let state = {
   currentLine: {},
 };
 
-toggleButton.addEventListener('click', () => {
-    if (isHorizontal) {
-      canvas.style.transform = "rotate(90deg) translateX(25%)";
-      canvas.style.transformOrigin = "center center";
-    } else {
-      canvas.style.transform = "none";
-      canvas.style.transformOrigin = "center center";
-    }
-    isHorizontal = !isHorizontal;
+const deletePointAndLines = (pointIndex) => {
+  state.lines = state.lines.filter(line => line.start !== pointIndex && line.end !== pointIndex);
+  state.points.splice(pointIndex, 1);
+
+  state.lines.forEach(line => {
+      if (line.start > pointIndex) line.start--;
+      if (line.end > pointIndex) line.end--;
   });
+};
+
+toggleButton.addEventListener('click', () => {
+  if (isHorizontal) {
+    canvas.style.transform = "rotate(90deg) translateX(25%)";
+    canvas.style.transformOrigin = "center center";
+  } else {
+    canvas.style.transform = "none";
+    canvas.style.transformOrigin = "center center";
+  }
+  isHorizontal = !isHorizontal;
+});
+
+eraserButton.addEventListener('click', () => {
+  isEraserMode = !isEraserMode;
+  eraserButton.textContent = isEraserMode ? '描画モード' : '削除モード';
+});
 
 const drawStaff = () => {
+  ctx.beginPath();
   [...Array(7).keys()].forEach((i) => {
     ctx.moveTo(0, 50 * (i + 1));
     ctx.lineTo(canvas.width, 50 * (i + 1));
@@ -75,6 +92,22 @@ const togglePointState = (points, index) => {
 canvas.addEventListener("mousedown", (e) => {
   const { offsetX, offsetY } = e;
   const nearY = getNearestLine(offsetY);
+  if (isEraserMode) {
+    const pointIndex = state.points.findIndex(
+      (p) => Math.hypot(p.x - offsetX, p.y - nearY) < pointRadius
+    );
+    if (pointIndex !== -1) {
+      const linesToDelete = state.lines.filter(line => line.start === pointIndex || line.end === pointIndex);
+      linesToDelete.forEach(line => {
+        const otherPointIndex = line.start === pointIndex ? line.end : line.start;
+        deletePointAndLines(otherPointIndex);
+      });
+      deletePointAndLines(pointIndex);
+    }
+    redrawEverything(state);
+    return;
+  }
+
   const pointIndex = state.points.findIndex(
     (p) => Math.hypot(p.x - offsetX, p.y - nearY) < pointRadius
   );
