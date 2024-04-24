@@ -1,0 +1,102 @@
+#musicCanvas {
+    border: 1px solid black;
+    background-color: #f8f8f8;
+}
+canvas {
+    border: 1px solid black;
+    transition: transform 0.4s ease-in-out;
+}
+#container {
+    position: relative;
+    width: 800px; /* コンテナの幅を設定 */
+    height: 400px; /* コンテナの高さを設定 */
+    /* overflow: hidden; はみ出た部分は非表示に */
+    margin: 40px auto; /* 画面中央に配置 */
+}
+
+/* .button-45 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 250px;
+    margin: 0 auto;
+    padding: .9em 2em;
+    border-top: 1px solid #2589d0;
+    border-right: none;
+    border-bottom: 1px solid #2589d0;
+    border-left: none;
+    background-color: #fff;
+    color: #2589d0;
+    font-size: 1em;
+}
+
+.button-45::before,
+.button-45::after {
+    position: absolute;
+    width: 1px;
+    height: 130%;
+    background-color: #2589d0;
+    content: '';
+}
+
+.button-45::before {
+    left: calc(3.1em / 5 - 1px);
+}
+
+.button-45::after {
+    right: calc(3.1em / 5 - 1px);
+} */
+
+.button-54 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 170px;
+    margin: 0 auto;
+    padding: .9em 3em .9em 2em;
+    border: 1px solid #242424;
+    border-radius: 25px;
+    background-color: #fff;
+    color: #242424;
+    font-size: 1em;
+}
+
+.button-54::after {
+    position: absolute;
+    right: 2em;
+    transform: translateY(-50%);
+    transform-origin: left;
+    width: 2em;
+    height: .5em;
+    background-color: #242424;
+    clip-path: polygon(0 100%, 100% 100%, 70% 40%, 70% 90%, 0% 90%);
+    content: '';
+    transition: transform .3s;
+}
+
+.button-54:hover::after {
+    transform: translateY(-50%) scaleX(1.4);
+}
+
+.button-55 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 170px;
+    margin: 0 auto;
+    padding: .9em 3em .9em 2em;
+    border: 1px solid #242424;
+    border-radius: 25px;
+    background-color: #fff;
+    color: #242424;
+    font-size: 1em;
+}
+
+
+
+.eraserMode {
+    background-color: rgb(215, 146, 146); /* 消しゴムモードがONの時、ボタンの背景色を赤にする */
+  }
