@@ -97,8 +97,12 @@ canvas.addEventListener("mousedown", (e) => {
       (p) => Math.hypot(p.x - offsetX, p.y - nearY) < pointRadius
     );
     if (pointIndex !== -1) {
-      state.lines = state.lines.filter(line => line.start !== pointIndex && line.end !== pointIndex);
-      state.points[pointIndex].active = false;
+      const linesToDelete = state.lines.filter(line => line.start === pointIndex || line.end === pointIndex);
+      linesToDelete.forEach(line => {
+        const otherPointIndex = line.start === pointIndex ? line.end : line.start;
+        deletePointAndLines(otherPointIndex);
+      });
+      deletePointAndLines(pointIndex);
     }
     redrawEverything(state);
     return;
