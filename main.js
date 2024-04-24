@@ -13,13 +13,16 @@ let state = {
   currentLine: {},
 };
 
-const deletePointAndLines = (pointIndex) => {
+const deletePointAndConnectedElements = (pointIndex) => {
   state.lines = state.lines.filter(line => line.start !== pointIndex && line.end !== pointIndex);
-  state.points.splice(pointIndex, 1);
+
+  state.points[pointIndex] = null;
+
+  state.points = state.points.filter(p => p !== null);
 
   state.lines.forEach(line => {
-      if (line.start > pointIndex) line.start--;
-      if (line.end > pointIndex) line.end--;
+    if (line.start > pointIndex) line.start--;
+    if (line.end > pointIndex) line.end--;
   });
 };
 
@@ -71,14 +74,18 @@ const clearCanvas = () => {
 const redrawEverything = (state) => {
   clearCanvas();
   drawStaff();
-  state.lines.forEach(({ start, end }) => {
-    const startPoint = state.points[start];
-    const endPoint = state.points[end];
-    if (startPoint.active && endPoint.active) {
+  state.lines.forEach(line => {
+    const startPoint = state.points[line.start];
+    const endPoint = state.points[line.end];
+    if (startPoint && endPoint) {
       drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
   });
-  state.points.forEach(({ x, y, active }) => drawPoint(x, y, active));
+  state.points.forEach(point => {
+    if (point) {
+      drawPoint(point.x, point.y, point.active);
+    }
+  });
 };
 
 const getNearestLine = (y) => 50 * Math.round(y / 50);
@@ -97,16 +104,12 @@ canvas.addEventListener("mousedown", (e) => {
       (p) => Math.hypot(p.x - offsetX, p.y - nearY) < pointRadius
     );
     if (pointIndex !== -1) {
-      const linesToDelete = state.lines.filter(line => line.start === pointIndex || line.end === pointIndex);
-      linesToDelete.forEach(line => {
-        const otherPointIndex = line.start === pointIndex ? line.end : line.start;
-        deletePointAndLines(otherPointIndex);
-      });
-      deletePointAndLines(pointIndex);
+      deletePointAndConnectedElements(pointIndex);
+      redrawEverything(state);
     }
-    redrawEverything(state);
     return;
   }
+
 
   const pointIndex = state.points.findIndex(
     (p) => Math.hypot(p.x - offsetX, p.y - nearY) < pointRadius
