@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>7線譜エディタ</title>
   <link rel="stylesheet" href="styles.css">
   <script type="application/javascript">
-    function draw(){
+    function draw() {
       let canvas = document.getElementById("test");
       if (canvas.getContext) {
         let ctx = canvas.getContext("2d");
@@ -20,13 +21,15 @@
     }
   </script>
 </head>
+
 <body onload="draw();">
-    <button id="toggleOrientation" class="button-54">縦横回転</button>
-    <button id="toggleEraserMode" class="button-55">削除モード</button>
-    <div id="container">
-        <canvas id="musicCanvas" width="800" height="400"></canvas>
-    </div>
+  <button id="toggleOrientation" class="button-54">縦横回転</button>
+  <button id="toggleEraserMode" class="button-55">削除モード</button>
+  <div id="container">
+    <canvas id="musicCanvas" width="800" height="400"></canvas>
+  </div>
   <script src="main.js"></script>
   <canvas id="test" width="150" height="150"></canvas>
 </body>
+
 </html>
