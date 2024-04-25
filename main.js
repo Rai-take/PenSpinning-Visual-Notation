@@ -3,9 +3,14 @@ const ctx = canvas.getContext("2d");
 const pointRadius = 10;
 const toggleButton = document.getElementById('toggleOrientation');
 const eraserButton = document.getElementById('toggleEraserMode');
-let isHorizontal = true;
 let isEraserMode = false;
 
+//最初から縦に変換する(暫定対処なのでキャンバスサイズを後で変える)
+let isHorizontal = false;
+canvas.style.transform = "rotate(90deg) translateX(25%)";
+canvas.style.transformOrigin = "center center";
+
+//状態管理
 let state = {
   points: [],
   lines: [],
@@ -44,6 +49,7 @@ eraserButton.addEventListener('click', () => {
 
 const drawStaff = () => {
   ctx.beginPath();
+  ctx.strokeStyle = '#808080';
   [...Array(7).keys()].forEach((i) => {
     ctx.moveTo(0, 50 * (i + 1));
     ctx.lineTo(canvas.width, 50 * (i + 1));
@@ -64,8 +70,59 @@ const drawLine = (fromX, fromY, toX, toY) => {
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
   ctx.lineTo(fromX, toY);
+  ctx.strokeStyle = 'black';
   ctx.stroke();
+
+  const lineX = toX + pointRadius; // △の位置を調整する場合はこの値を変更
+
+  const startLine = Math.ceil(Math.min(fromY, toY) / 50);
+  const endLine = Math.floor(Math.max(fromY, toY) / 50);
+  for (let line = startLine + 1; line < endLine; line++) { // 点の位置を含まないようにしてる
+    const posY = line * 50.8; //△のよこ軸の位置？
+    // const posY = line * 50;
+    drawTriangle(lineX, posY);
+  }
 };
+
+//△の位置が統一されていないけど角度と△の大きさを無理やりいじった版
+//こっちにする場合 △のよこ軸の位置？ってコメント書いてあるところを有効化し、line * 50の方をコメントにする
+// 掌側
+const drawTriangle = (x, y) => {
+  // △のサイズ
+  const triangleHeight = 15.3;
+  const triangleBase = 9;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.translate(x, y);
+  ctx.rotate(Math.PI / 5.83);
+  ctx.moveTo(0, -triangleHeight);
+  ctx.lineTo(triangleBase, 0);
+  ctx.lineTo(-triangleBase, 0);
+  ctx.closePath();
+  ctx.strokeStyle = 'black';
+  ctx.stroke();
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.restore();
+};
+
+//三角の位置が統一されているけど角度がおかしい版
+// const drawTriangle = (x, y) => {
+//   // △のサイズ
+//   const triangleHeight = 15;
+//   const triangleBase = 9;
+
+//   ctx.beginPath();
+//   ctx.moveTo(x, y - triangleHeight);
+//   ctx.lineTo(x + triangleBase, y);
+//   ctx.lineTo(x - triangleBase, y);
+//   ctx.closePath();
+//   ctx.strokeStyle = 'black';
+//   ctx.stroke();
+//   ctx.fillStyle = 'white';
+//   ctx.fill();
+// };
 
 const clearCanvas = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -99,6 +156,30 @@ const togglePointState = (points, index) => {
 canvas.addEventListener("mousedown", (e) => {
   const { offsetX, offsetY } = e;
   const nearY = getNearestLine(offsetY);
+
+  // △のクリック判定
+  const triangleClicked = state.lines.some((line, index) => {
+    const startPoint = state.points[line.start];
+    const endPoint = state.points[line.end];
+    if (!startPoint || !endPoint) return false; // 点が存在しない場合はスキップ
+
+    const lineX = endPoint.x + pointRadius;
+    const startLine = Math.ceil(Math.min(startPoint.y, endPoint.y) / 50);
+    const endLine = Math.floor(Math.max(startPoint.y, endPoint.y) / 50);
+    for (let line = startLine + 1; line < endLine; line++) {
+      const posY = line * 50.8;
+      if (Math.hypot(lineX - offsetX, posY - offsetY) < pointRadius) {
+        // 線の反対側に反転させる処理
+        [state.points[line.start].y, state.points[line.end].y] = [state.points[line.end].y, state.points[line.start].y];
+        redrawEverything(state);
+        return true;
+      }
+    }
+    return false;
+  });
+
+  if (triangleClicked) return; // △がクリックされた場合はここで処理を終了
+
   if (isEraserMode) {
     const pointIndex = state.points.findIndex(
       (p) => Math.hypot(p.x - offsetX, p.y - nearY) < pointRadius
@@ -109,7 +190,6 @@ canvas.addEventListener("mousedown", (e) => {
     }
     return;
   }
-
 
   const pointIndex = state.points.findIndex(
     (p) => Math.hypot(p.x - offsetX, p.y - nearY) < pointRadius
