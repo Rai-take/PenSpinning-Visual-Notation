@@ -1,8 +1,8 @@
 const canvas = document.getElementById("musicCanvas");
 const ctx = canvas.getContext("2d");
 const pointRadius = 10;
-const toggleButton = document.getElementById('toggleOrientation');
-const eraserButton = document.getElementById('toggleEraserMode');
+const toggleButton = document.getElementById("toggleOrientation");
+const eraserButton = document.getElementById("toggleEraserMode");
 let isEraserMode = false;
 
 //最初から縦に変換する(暫定対処なのでキャンバスサイズを後で変える)
@@ -19,19 +19,21 @@ let state = {
 };
 
 const deletePointAndConnectedElements = (pointIndex) => {
-  state.lines = state.lines.filter(line => line.start !== pointIndex && line.end !== pointIndex);
+  state.lines = state.lines.filter(
+    (line) => line.start !== pointIndex && line.end !== pointIndex
+  );
 
   state.points[pointIndex] = null;
 
-  state.points = state.points.filter(p => p !== null);
+  state.points = state.points.filter((p) => p !== null);
 
-  state.lines.forEach(line => {
+  state.lines.forEach((line) => {
     if (line.start > pointIndex) line.start--;
     if (line.end > pointIndex) line.end--;
   });
 };
 
-toggleButton.addEventListener('click', () => {
+toggleButton.addEventListener("click", () => {
   if (isHorizontal) {
     canvas.style.transform = "rotate(90deg) translateX(25%)";
     canvas.style.transformOrigin = "center center";
@@ -42,14 +44,14 @@ toggleButton.addEventListener('click', () => {
   isHorizontal = !isHorizontal;
 });
 
-eraserButton.addEventListener('click', () => {
+eraserButton.addEventListener("click", () => {
   isEraserMode = !isEraserMode;
-  eraserButton.textContent = isEraserMode ? '描画モード' : '削除モード';
+  eraserButton.textContent = isEraserMode ? "描画モード" : "削除モード";
 });
 
 const drawStaff = () => {
   ctx.beginPath();
-  ctx.strokeStyle = '#808080';
+  ctx.strokeStyle = "#808080";
   [...Array(7).keys()].forEach((i) => {
     ctx.moveTo(0, 50 * (i + 1));
     ctx.lineTo(canvas.width, 50 * (i + 1));
@@ -70,14 +72,15 @@ const drawLine = (fromX, fromY, toX, toY) => {
   ctx.beginPath();
   ctx.moveTo(fromX, fromY);
   ctx.lineTo(fromX, toY);
-  ctx.strokeStyle = 'black';
+  ctx.strokeStyle = "black";
   ctx.stroke();
 
   const lineX = toX + pointRadius; // △の位置を調整する場合はこの値を変更
 
   const startLine = Math.ceil(Math.min(fromY, toY) / 50);
   const endLine = Math.floor(Math.max(fromY, toY) / 50);
-  for (let line = startLine + 1; line < endLine; line++) { // 点の位置を含まないようにしてる
+  for (let line = startLine + 1; line < endLine; line++) {
+    // 点の位置を含まないようにしてる
     const posY = line * 50.8; //△のよこ軸の位置？
     // const posY = line * 50;
     drawTriangle(lineX, posY);
@@ -87,6 +90,9 @@ const drawLine = (fromX, fromY, toX, toY) => {
 //△の位置が統一されていないけど角度と△の大きさを無理やりいじった版
 //こっちにする場合 △のよこ軸の位置？ってコメント書いてあるところを有効化し、line * 50の方をコメントにする
 // 掌側
+
+// 三角の回転系がうまくいってないのは、縦モード時の三角頂点を特定できてないからだと思う
+
 const drawTriangle = (x, y) => {
   // △のサイズ
   const triangleHeight = 15.3;
@@ -94,15 +100,15 @@ const drawTriangle = (x, y) => {
 
   ctx.save();
   ctx.beginPath();
-  ctx.translate(x, y);
+  ctx.translate(x, y); // 回転の原点を指定
   ctx.rotate(Math.PI / 5.83);
   ctx.moveTo(0, -triangleHeight);
   ctx.lineTo(triangleBase, 0);
   ctx.lineTo(-triangleBase, 0);
   ctx.closePath();
-  ctx.strokeStyle = 'black';
+  ctx.strokeStyle = "black";
   ctx.stroke();
-  ctx.fillStyle = 'white';
+  ctx.fillStyle = "white";
   ctx.fill();
   ctx.restore();
 };
@@ -131,14 +137,14 @@ const clearCanvas = () => {
 const redrawEverything = (state) => {
   clearCanvas();
   drawStaff();
-  state.lines.forEach(line => {
+  state.lines.forEach((line) => {
     const startPoint = state.points[line.start];
     const endPoint = state.points[line.end];
     if (startPoint && endPoint) {
       drawLine(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     }
   });
-  state.points.forEach(point => {
+  state.points.forEach((point) => {
     if (point) {
       drawPoint(point.x, point.y, point.active);
     }
@@ -169,8 +175,11 @@ canvas.addEventListener("mousedown", (e) => {
     for (let line = startLine + 1; line < endLine; line++) {
       const posY = line * 50.8;
       if (Math.hypot(lineX - offsetX, posY - offsetY) < pointRadius) {
-        // 線の反対側に反転させる処理
-        [state.points[line.start].y, state.points[line.end].y] = [state.points[line.end].y, state.points[line.start].y];
+        // 線の反対側に反転させる処理 (なぜかできない！)
+        [state.points[line.start].y, state.points[line.end].y] = [
+          state.points[line.end].y,
+          state.points[line.start].y,
+        ];
         redrawEverything(state);
         return true;
       }
@@ -215,7 +224,12 @@ canvas.addEventListener("mousemove", (e) => {
   if (state.isDrawing) {
     redrawEverything(state);
     const { offsetX, offsetY } = e;
-    drawLine(state.currentLine.startX, state.currentLine.startY, offsetX, getNearestLine(offsetY));
+    drawLine(
+      state.currentLine.startX,
+      state.currentLine.startY,
+      offsetX,
+      getNearestLine(offsetY)
+    );
   }
 });
 
